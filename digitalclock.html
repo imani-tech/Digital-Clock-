@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Glassy Flip Clock | Dark Edition</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      min-height: 100vh;
+      background: radial-gradient(circle at 20% 30%, #0a0f1e, #03060c);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Poppins', 'Segoe UI', 'Orbitron', monospace;
+      padding: 1.5rem;
+      position: relative;
+      backdrop-filter: blur(2px);
+    }
+
+    /* Main glass panel */
+    .clock-container {
+      background: rgba(18, 28, 40, 0.45);
+      backdrop-filter: blur(14px) saturate(180%);
+      border-radius: 3rem;
+      padding: 2rem 2rem 2rem 2rem;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5), inset 0 1px 1px rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(120, 180, 255, 0.25);
+      transition: all 0.3s ease;
+    }
+
+    /* Flip clock main layout */
+    .flip-clock {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    /* Digit group (pair + separator) */
+    .time-group {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: transparent;
+    }
+
+    /* Individual digit unit: glassy card */
+    .digit {
+      position: relative;
+      width: 110px;
+      height: 140px;
+      background: linear-gradient(145deg, rgba(25, 38, 52, 0.8), rgba(10, 18, 28, 0.9));
+      backdrop-filter: blur(4px);
+      border-radius: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 12px 28px -8px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(80, 140, 210, 0.35);
+      transition: all 0.2s;
+      transform-style: preserve-3d;
+      cursor: default;
+    }
+
+    /* Inner number style */
+    .digit-number {
+      font-size: 5.2rem;
+      font-weight: 700;
+      font-family: 'Orbitron', 'Poppins', monospace;
+      background: linear-gradient(135deg, #eef5ff, #b0d4ff);
+      background-clip: text;
+      -webkit-background-clip: text;
+      color: transparent;
+      text-shadow: 0 0 8px rgba(80, 160, 255, 0.4);
+      letter-spacing: 2px;
+      transition: all 0.1s;
+    }
+
+    /* Flip animation - glassy 3D spin */
+    @keyframes glassFlip {
+      0% {
+        transform: rotateX(0deg);
+        filter: brightness(1);
+        box-shadow: 0 12px 28px -8px rgba(0, 0, 0, 0.6);
+      }
+      45% {
+        transform: rotateX(94deg);
+        filter: brightness(1.2);
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.8);
+      }
+      55% {
+        transform: rotateX(86deg);
+        filter: brightness(1.25);
+      }
+      100% {
+        transform: rotateX(0deg);
+        filter: brightness(1);
+        box-shadow: 0 12px 28px -8px rgba(0, 0, 0, 0.6);
+      }
+    }
+
+    .digit.flipping {
+      animation: glassFlip 0.32s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+      will-change: transform;
+    }
+
+    /* Separator (colon) glassy style */
+    .separator {
+      font-size: 4.2rem;
+      font-weight: 600;
+      background: linear-gradient(135deg, #aac9ff, #6c9be0);
+      background-clip: text;
+      -webkit-background-clip: text;
+      color: transparent;
+      text-shadow: 0 0 10px rgba(100, 160, 255, 0.6);
+      width: 30px;
+      text-align: center;
+      margin: 0 4px;
+      letter-spacing: 2px;
+      font-family: monospace;
+    }
+
+    /* Subtitle / label */
+    .clock-label {
+      text-align: center;
+      margin-top: 1.5rem;
+      font-size: 0.9rem;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      background: linear-gradient(120deg, #cdedff, #8bb9fe);
+      background-clip: text;
+      -webkit-background-clip: text;
+      color: transparent;
+      font-weight: 500;
+      opacity: 0.8;
+      backdrop-filter: blur(4px);
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 750px) {
+      .digit {
+        width: 75px;
+        height: 100px;
+        border-radius: 18px;
+      }
+      .digit-number {
+        font-size: 3.8rem;
+      }
+      .separator {
+        font-size: 3rem;
+        width: 20px;
+      }
+      .clock-container {
+        padding: 1.2rem 1.5rem;
+        border-radius: 2rem;
+      }
+    }
+
+    @media (max-width: 560px) {
+      .digit {
+        width: 60px;
+        height: 85px;
+      }
+      .digit-number {
+        font-size: 2.8rem;
+      }
+      .separator {
+        font-size: 2.5rem;
+        margin: 0 2px;
+      }
+      .time-group {
+        gap: 0.25rem;
+      }
+      .flip-clock {
+        gap: 0.2rem;
+      }
+      .clock-label {
+        font-size: 0.7rem;
+        margin-top: 1rem;
+      }
+    }
+
+    /* glowing border animation on container (optional) */
+    @keyframes softGlow {
+      0% {
+        border-color: rgba(80, 160, 255, 0.2);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5), inset 0 1px 1px rgba(255, 255, 255, 0.05);
+      }
+      50% {
+        border-color: rgba(80, 180, 255, 0.5);
+        box-shadow: 0 20px 45px rgba(0, 30, 60, 0.4), inset 0 1px 2px rgba(255, 255, 255, 0.1);
+      }
+      100% {
+        border-color: rgba(80, 160, 255, 0.2);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5), inset 0 1px 1px rgba(255, 255, 255, 0.05);
+      }
+    }
+
+    .clock-container {
+      animation: softGlow 4s infinite ease-in-out;
+    }
+
+    /* Reflection / glass shine effect */
+    .digit::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 40%;
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.02) 100%);
+      border-radius: 24px 24px 48px 48px;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    /* hover effect on digits for extra glass feel */
+    .digit:hover {
+      border-color: rgba(100, 180, 255, 0.6);
+      box-shadow: 0 0 14px rgba(80, 160, 255, 0.3), inset 0 1px 0 rgba(255,255,255,0.15);
+      transform: translateY(-2px);
+      transition: all 0.2s;
+    }
+  </style>
+</head>
+<body>
+<div class="clock-container">
+  <div class="flip-clock" id="flipClock">
+    <!-- Hours group -->
+    <div class="time-group">
+      <div class="digit" data-digit-index="0">
+        <span class="digit-number" id="digit0">0</span>
+      </div>
+      <div class="digit" data-digit-index="1">
+        <span class="digit-number" id="digit1">0</span>
+      </div>
+    </div>
+    <div class="separator">:</div>
+    <!-- Minutes group -->
+    <div class="time-group">
+      <div class="digit" data-digit-index="2">
+        <span class="digit-number" id="digit2">0</span>
+      </div>
+      <div class="digit" data-digit-index="3">
+        <span class="digit-number" id="digit3">0</span>
+      </div>
+    </div>
+    <div class="separator">:</div>
+    <!-- Seconds group -->
+    <div class="time-group">
+      <div class="digit" data-digit-index="4">
+        <span class="digit-number" id="digit4">0</span>
+      </div>
+      <div class="digit" data-digit-index="5">
+        <span class="digit-number" id="digit5">0</span>
+      </div>
+    </div>
+  </div>
+  <div class="clock-label">★ FLIP MOMENTUM ★</div>
+</div>
+
+<script>
+  (function() {
+    // DOM elements & digit storage
+    const digitElements = [
+      document.getElementById('digit0'), // hour tens
+      document.getElementById('digit1'), // hour units
+      document.getElementById('digit2'), // minute tens
+      document.getElementById('digit3'), // minute units
+      document.getElementById('digit4'), // second tens
+      document.getElementById('digit5')  // second units
+    ];
+    
+    // Parent digit containers (for animation)
+    const digitContainers = [
+      document.querySelector('[data-digit-index="0"]'),
+      document.querySelector('[data-digit-index="1"]'),
+      document.querySelector('[data-digit-index="2"]'),
+      document.querySelector('[data-digit-index="3"]'),
+      document.querySelector('[data-digit-index="4"]'),
+      document.querySelector('[data-digit-index="5"]')
+    ];
+    
+    // Store current displayed values as strings to compare changes
+    let currentDigits = ['0', '0', '0', '0', '0', '0'];
+    
+    // flip lock states to prevent overlapping animations on same digit
+    let flippingActive = [false, false, false, false, false, false];
+    let flipTimeouts = [null, null, null, null, null, null];
+    
+    // Helper: format time to 6 digit string (HHMMSS)
+    function getFormattedTimeDigits() {
+      const now = new Date();
+      let hours = now.getHours();
+      const minutes = now.getMinutes();
+      const seconds = now.getSeconds();
+      
+      // Use 24-hour format
+      const hoursStr = hours.toString().padStart(2, '0');
+      const minutesStr = minutes.toString().padStart(2, '0');
+      const secondsStr = seconds.toString().padStart(2, '0');
+      
+      // Return array of individual characters: [H1, H2, M1, M2, S1, S2]
+      return [
+        hoursStr[0], hoursStr[1],
+        minutesStr[0], minutesStr[1],
+        secondsStr[0], secondsStr[1]
+      ];
+    }
+    
+    // Perform flip transition for a specific digit position
+    function flipDigitWithAnimation(index, newDigitChar) {
+      // Safety: if index out of range or same as current no flip needed (should be filtered before call)
+      if (index < 0 || index > 5) return;
+      if (flippingActive[index]) return; // skip if already flipping
+      
+      const digitSpan = digitElements[index];
+      const container = digitContainers[index];
+      if (!digitSpan || !container) return;
+      
+      const oldVal = currentDigits[index];
+      if (oldVal === newDigitChar) return; // already matching
+      
+      // Lock this digit to avoid double flip during animation
+      flippingActive[index] = true;
+      
+      // Add flip animation class to parent container (glass flip effect)
+      container.classList.add('flipping');
+      
+      // Schedule the text update at the middle of the animation ( ~ half duration 160ms )
+      // The keyframe rotation peaks around 50%, updating then gives illusion of flip reveal
+      const updateTimer = setTimeout(() => {
+        // update digit text content
+        digitSpan.textContent = newDigitChar;
+        // also update currentDigits array for consistency
+        currentDigits[index] = newDigitChar;
+      }, 150); // half of 320ms animation
+      
+      // Cleanup after animation ends: remove class, unlock flip, clear timeout if any
+      const onAnimationFinish = () => {
+        // remove class regardless
+        container.classList.remove('flipping');
+        // ensure we clear the update timer if somehow animation ends before update fired
+        if (updateTimer) clearTimeout(updateTimer);
+        // but also ensure we update just in case the update didn't execute
+        // (edge case: if animation ends extremely fast, we still set digit)
+        if (digitSpan.textContent !== newDigitChar) {
+          digitSpan.textContent = newDigitChar;
+          currentDigits[index] = newDigitChar;
+        }
+        // unlock digit
+        flippingActive[index] = false;
+        // remove event listener after execution
+        container.removeEventListener('animationend', onAnimationFinish);
+        // also clear stored timeout reference
+        if (flipTimeouts[index]) {
+          clearTimeout(flipTimeouts[index]);
+          flipTimeouts[index] = null;
+        }
+      };
+      
+      // store timeout ref in case we need to abort on multiple calls but we locked
+      flipTimeouts[index] = updateTimer;
+      
+      // Add listener for the end of animation to clean correctly
+      container.addEventListener('animationend', onAnimationFinish, { once: true });
+      
+      // Extra safety: if animation somehow never fires (browser edge), fallback timer
+      const fallbackTimer = setTimeout(() => {
+        if (flippingActive[index]) {
+          // force cleanup
+          container.classList.remove('flipping');
+          if (digitSpan.textContent !== newDigitChar) {
+            digitSpan.textContent = newDigitChar;
+            currentDigits[index] = newDigitChar;
+          }
+          flippingActive[index] = false;
+          if (flipTimeouts[index]) clearTimeout(flipTimeouts[index]);
+          container.removeEventListener('animationend', onAnimationFinish);
+        }
+      }, 500);
+      
+      // also ensure we clear fallback when animation ends properly
+      const originalCleanup = onAnimationFinish;
+      const enhancedCleanup = () => {
+        clearTimeout(fallbackTimer);
+        originalCleanup();
+      };
+      container.removeEventListener('animationend', onAnimationFinish);
+      container.addEventListener('animationend', enhancedCleanup, { once: true });
+    }
+    
+    // Synchronize clock and trigger flips for any digit that changed
+    function updateClock() {
+      const newDigits = getFormattedTimeDigits();
+      
+      // For each position, compare and flip if changed
+      for (let i = 0; i < 6; i++) {
+        const newVal = newDigits[i];
+        const oldVal = currentDigits[i];
+        
+        if (newVal !== oldVal) {
+          // Trigger glass flip effect for this digit
+          flipDigitWithAnimation(i, newVal);
+        }
+      }
+      
+      // Final safety: update all digits in case some lock prevented but should be fine
+      // ensure displayed text matches currentDigits after flips (post-sync)
+      for (let i = 0; i < 6; i++) {
+        const span = digitElements[i];
+        if (span.textContent !== currentDigits[i]) {
+          // direct update without animation if something desync (rare)
+          span.textContent = currentDigits[i];
+        }
+      }
+    }
+    
+    // initialize first time display without animation on page load
+    function initialSetDisplay() {
+      const initDigits = getFormattedTimeDigits();
+      for (let i = 0; i < 6; i++) {
+        const span = digitElements[i];
+        if (span) {
+          span.textContent = initDigits[i];
+          currentDigits[i] = initDigits[i];
+        }
+      }
+    }
+    
+    // Start ticking interval
+    let intervalId = null;
+    
+    function startClock() {
+      if (intervalId) clearInterval(intervalId);
+      // immediately set display to avoid blank flash
+      initialSetDisplay();
+      // then update each second, and also at exact seconds boundary align flips
+      intervalId = setInterval(() => {
+        updateClock();
+      }, 1000);
+    }
+    
+    // optional: re-align after focus or when needed (avoid drift)
+    function syncPrecise() {
+      const now = new Date();
+      const msUntilNextSecond = 1000 - now.getMilliseconds();
+      setTimeout(() => {
+        updateClock();
+        // reset interval to ensure no double
+        if (intervalId) clearInterval(intervalId);
+        intervalId = setInterval(() => {
+          updateClock();
+        }, 1000);
+      }, msUntilNextSecond);
+    }
+    
+    // Initialize: show static then start dynamic flips
+    initialSetDisplay();
+    startClock();
+    
+    // For perfect synchronization with the exact second change, resync at each minute optional but good
+    // also ensure that after page focus any delay compensation (smooth)
+    window.addEventListener('visibilitychange', () => {
+      if (!document.hidden) {
+        // re-sync immediately when tab becomes active
+        updateClock();
+        // resync interval to avoid double intervals (just restart fresh)
+        if (intervalId) clearInterval(intervalId);
+        startClock();
+      }
+    });
+    
+    // avoid memory leaks and preserve correct time on page load drift
+    // (add a fallback micro adjustment)
+    setTimeout(() => {
+      updateClock(); // extra sync after 300ms to correct initial load if any missing flip
+    }, 300);
+    
+    // Optional: Add a subtle 'tick' vibration effect? not needed but adds digital elegance:
+    // Just for extra polish - we also ensure each second the flip transitions look seamless
+    // For digits that flip simultaneously (e.g., 09:59:59 to 10:00:00) multiple flips work 
+    // because each digit flip triggers its own independent animation queue.
+    
+    console.log('Glassy Flip Clock Active — enjoy the dark elegant flips');
+  })();
+</script>
+</body>
+</html>
